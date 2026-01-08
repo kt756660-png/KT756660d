@@ -1,170 +1,147 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>AI Phân Tích Gia Phả</title>
+  <meta charset="UTF-8">
+  <title>Tách số điện thoại</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-/* ===============================
-   BACKGROUND
-================================ */
-body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: Arial, sans-serif;
-    background-image: url("https://i.pinimg.com/originals/68/72/91/687291593117954655.jpg");
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-}
+  <style>
+    /* RESET */
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
 
-/* LỚP PHỦ TRONG SUỐT */
-.overlay {
-    min-height: 100vh;
-    background: rgba(0, 0, 0, 0.55); /* chỉnh độ trong suốt ở đây */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-/* ===============================
-   GLASS CONTAINER
-================================ */
-.container {
-    width: 90%;
-    max-width: 900px;
-    padding: 25px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 0 40px rgba(0,0,0,0.6);
-    color: #fff;
-}
+    /* VIDEO BACKGROUND */
+    .video-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+    }
 
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-}
+    .video-bg iframe {
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
 
-/* ===============================
-   INPUT / OUTPUT
-================================ */
-textarea {
-    width: 100%;
-    height: 140px;
-    background: rgba(0,0,0,0.45);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 8px;
-    padding: 10px;
-    resize: vertical;
-}
+    /* GLASS CARD */
+    .card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 520px;
+      padding: 24px;
 
-button {
-    margin-top: 12px;
-    padding: 10px 18px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(0, 150, 255, 0.8);
-    color: #fff;
-    font-weight: bold;
-    cursor: pointer;
-}
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
 
-button:hover {
-    background: rgba(0, 180, 255, 1);
-}
+      text-align: center;
+    }
 
-pre {
-    margin-top: 15px;
-    padding: 12px;
-    background: rgba(0,0,0,0.5);
-    border-radius: 8px;
-    max-height: 300px;
-    overflow: auto;
-}
-</style>
+    h1 {
+      margin-top: 0;
+      font-size: 26px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 110px;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      resize: none;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    pre {
+      margin-top: 12px;
+      padding: 10px;
+      background: rgba(0,0,0,0.08);
+      border-radius: 8px;
+      text-align: left;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 12px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+  </style>
 </head>
 
 <body>
-<div class="overlay">
-    <div class="container">
-        <h1>🧠 AI Phân Tích Gia Phả</h1>
 
-        <textarea id="input">
-Nguyễn Văn C, sinh 1900
-Nguyễn Văn B, sinh 1925, con Nguyễn Văn C
-Nguyễn Văn A, sinh 1950, con Nguyễn Văn B
-        </textarea>
+  <!-- VIDEO BACKGROUND -->
+  <div class="video-bg">
+    <iframe
+      src="https://www.youtube.com/embed/K2csY1cMpfA?autoplay=1&mute=1&loop=1&playlist=K2csY1cMpfA"
+      frameborder="0"
+      allow="autoplay"
+      allowfullscreen>
+    </iframe>
+  </div>
 
-        <button onclick="analyze()">Phân tích gia phả</button>
+  <!-- CONTENT -->
+  <div class="card">
+    <h1>📞 Tách số điện thoại</h1>
 
-        <pre id="output"></pre>
-    </div>
-</div>
+    <textarea id="inputText" placeholder="Dán văn bản vào đây..."></textarea>
 
-<script>
-/* ===============================
-   AI LOGIC (JS)
-================================ */
+    <button onclick="extractPhone()">Tách số</button>
 
-function parseText(text) {
-    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-    const people = [];
+    <pre id="result">Kết quả sẽ hiển thị ở đây</pre>
 
-    lines.forEach(line => {
-        const name = line.match(/^(.+?)(,|$)/);
-        const birth = line.match(/sinh\s*(\d{4})/);
-        const father = line.match(/con\s+(.+)$/);
+    <a id="downloadLink" href="#" download="so_dien_thoai.txt">🔗 Link liền mạch</a>
+  </div>
 
-        people.push({
-            name: name ? name[1].trim() : null,
-            birth_year: birth ? parseInt(birth[1]) : null,
-            father: father ? father[1].trim() : null
-        });
-    });
+  <script>
+    function extractPhone() {
+      const text = document.getElementById("inputText").value;
 
-    return people;
-}
+      // Regex tách số điện thoại (VN + quốc tế phổ biến)
+      const regex = /(?:\+?\d{1,3}[\s.-]?)?(?:\(?\d{2,4}\)?[\s.-]?)?\d{3,4}[\s.-]?\d{3,4}/g;
 
-function buildTree(people) {
-    const map = {};
-    const children = {};
-    const roots = [];
+      const matches = text.match(regex);
+      const result = matches ? matches.join("\n") : "Không tìm thấy số điện thoại.";
 
-    people.forEach(p => {
-        map[p.name] = p;
-        children[p.name] = [];
-    });
+      document.getElementById("result").textContent = result;
 
-    people.forEach(p => {
-        if (p.father && map[p.father]) {
-            children[p.father].push(p.name);
-        } else {
-            roots.push(p.name);
-        }
-    });
+      // Tạo link liền mạch
+      const blob = new Blob([result], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
 
-    function makeNode(name) {
-        return {
-            name: name,
-            birth_year: map[name].birth_year,
-            children: children[name].map(makeNode)
-        };
+      const link = document.getElementById("downloadLink");
+      link.href = url;
     }
+  </script>
 
-    return roots.map(makeNode);
-}
-
-function analyze() {
-    const input = document.getElementById("input").value;
-    const people = parseText(input);
-    const tree = buildTree(people);
-
-    document.getElementById("output").textContent =
-        JSON.stringify(tree, null, 2);
-}
-</script>
 </body>
 </html>
