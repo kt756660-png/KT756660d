@@ -153,7 +153,7 @@ function generateMessage(){
         : `0939.965.838`;
 
     let message =
-`Đề nghị gia đình báo cho Ông/bà: ${name}
+`Phiền gia đình báo cho Ông/bà: ${name}
 CCCD (CMND) số: ${cccd}
 Sinh ngày: ${birth}
 Quê quán: ${address}
